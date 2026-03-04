@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Business Analytics Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div>
+                    <h1>Meta Business Analytics Dashboard</h1>
+                </div>
+                <nav style="display: flex; gap: 10px; align-items: center;">
+                    <a href="/" class="active">Dashboard</a>
+                    <a href="/upload">Nahrát CSV</a>
+                    <a href="/logout" style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px;">Odhlásit se</a>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <div class="filter-section">
+                <h2>Filtry</h2>
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="start_date">Od:</label>
+                        <input type="date" id="start_date" name="start_date">
+                    </div>
+                    <div class="filter-group">
+                        <label for="end_date">Do:</label>
+                        <input type="date" id="end_date" name="end_date">
+                    </div>
+                    <div class="filter-group">
+                        <label for="platform">Platforma:</label>
+                        <select id="platform" name="platform">
+                            <option value="all">Všechny</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="facebook">Facebook</option>
+                        </select>
+                    </div>
+                    <button onclick="applyFilters()" class="btn-primary">Aplikovat filtry</button>
+                    <button onclick="exportData('followers')" class="btn-secondary">Export Followers</button>
+                    <button onclick="exportData('demographics')" class="btn-secondary">Export Demografie</button>
+                    <button onclick="exportData('engagement')" class="btn-secondary">Export Engagement</button>
+                </div>
+            </div>
+
+            <section class="dashboard-section">
+                <h2>Vývoj Followerů</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Aktuální počet</h3>
+                        <p id="current_followers" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Celkový růst</h3>
+                        <p id="total_growth" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Růst (%)</h3>
+                        <p id="growth_rate" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Průměrný denní růst</h3>
+                        <p id="avg_daily_growth" class="stat-value">-</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-section">
+                <h2>Demografie</h2>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Podle věku</h3>
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Podle pohlaví</h3>
+                        <canvas id="genderChart"></canvas>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <h3>Top lokace</h3>
+                    <table id="locationTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Lokace</th>
+                                <th>Počet</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="dashboard-section">
+                <h2>Engagement Metriky <span class="platform-badge" style="font-size: 0.6em; background: #667eea; color: white; padding: 4px 12px; border-radius: 12px; font-weight: normal; margin-left: 10px;">Facebook + Instagram</span></h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Celkové interakce</h3>
+                        <p id="total_interactions" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Průměrná engagement rate</h3>
+                        <p id="avg_engagement_rate" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Celkové zobrazení</h3>
+                        <p id="total_views" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Průměrný dosah</h3>
+                        <p id="avg_reach" class="stat-value">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Celkové návštěvy profilu</h3>
+                        <p id="total_visits" class="stat-value">-</p>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="engagementChart"></canvas>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
