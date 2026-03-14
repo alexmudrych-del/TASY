@@ -17,20 +17,17 @@ V repozitáři je teď **jen aplikace META Přehledy** (25 souborů). Data, uplo
 
 ## 2. Propojte lokální repozitář s GitHubem a pushněte
 
-V terminálu (ve složce **Cursor Git**, tedy kořen repozitáře) spusťte (nahraďte `VAS_GITHUB_UCET` svým uživatelským jménem na GitHubu):
+**Remote už je nastaven** na `https://github.com/alexmudrych/meta-prehledy.git`. Pokud je to váš účet, stačí po vytvoření repozitáře (krok 1) spustit:
 
 ```bash
 cd "/Users/alex08/Desktop/Cursor Git"
-
-git remote add origin https://github.com/VAS_GITHUB_UCET/meta-prehledy.git
-git branch -M main
 git push -u origin main
 ```
 
-Pokud používáte SSH:
+Pokud je váš GitHub účet jiný, nejdřív změňte URL:
 
 ```bash
-git remote add origin git@github.com:VAS_GITHUB_UCET/meta-prehledy.git
+git remote set-url origin https://github.com/VAS_GITHUB_UCET/meta-prehledy.git
 git push -u origin main
 ```
 
