@@ -1,0 +1,16 @@
+# OS a editor
+.DS_Store
+.cursor/
+
+# Ostatní projekty (do repozitáře bereme jen 4K/META Přehledy)
+Bez názvu/
+EU Aviation Eshops/
+Jet Concept/
+Knowledge/
+Upgates/
+
+# Ostatní složky v 4K (ne META Přehledy)
+4K/.DS_Store
+4K/B R N O K L I D E M/
+4K/GoGlamp Blog/
+4K/Lua Style/
