@@ -3,7 +3,7 @@ Meta Business CSV Analytics Dashboard
 Main Flask application for analyzing Meta Business Suite data
 """
 
-from flask import Flask, render_template, request, jsonify, send_file, session, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, session, redirect, url_for, flash
 import os
 from datetime import datetime
 import io
@@ -20,13 +20,17 @@ except ImportError:
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(24).hex())
-app.config['UPLOAD_FOLDER'] = 'uploads'
+base_dir = os.path.dirname(os.path.abspath(__file__))
+# Na Vercelu uploady do /tmp; lokálně do uploads
+app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', '/tmp/uploads' if os.environ.get('VERCEL') else 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['PASSWORD'] = os.environ.get('APP_PASSWORD', 'pneuboss2025')  # Default password
 
-# Create necessary directories
-os.makedirs('uploads', exist_ok=True)
-os.makedirs('data', exist_ok=True)
+if os.environ.get('VERCEL'):
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+else:
+    os.makedirs('uploads', exist_ok=True)
+    os.makedirs('data', exist_ok=True)
 os.makedirs('templates', exist_ok=True)
 os.makedirs('static/css', exist_ok=True)
 os.makedirs('static/js', exist_ok=True)
@@ -35,19 +39,24 @@ from models import db, FollowerSnapshot, Demographics, EngagementMetric
 from csv_parser import parse_csv_file
 from analytics import calculate_follower_growth, aggregate_demographics, calculate_engagement_metrics
 
-# Initialize database
-base_dir = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(base_dir, 'data', 'database.db')
-os.makedirs(os.path.dirname(db_path), exist_ok=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+# Database: Vercel = POSTGRES_URL/DATABASE_URL; lokálně SQLite
+database_url = os.environ.get('POSTGRES_URL') or os.environ.get('DATABASE_URL')
+if database_url:
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    db_path = os.path.join(base_dir, 'data', 'database.db')
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-# Initialize database tables
 try:
     with app.app_context():
         db.create_all()
-        print(f"Database initialized at: {db_path}")
+        uri = app.config['SQLALCHEMY_DATABASE_URI']
+        print(f"Database: {'Postgres' if 'postgresql' in uri else 'SQLite'}")
 except Exception as e:
     print(f"Error initializing database: {e}")
     raise
@@ -84,6 +93,15 @@ def logout():
     session.pop('logged_in', None)
     flash('Odhlášení úspěšné!', 'success')
     return redirect(url_for('login'))
+
+
+if not os.environ.get('VERCEL'):
+    @app.route('/css/<path:filename>')
+    def serve_css(filename):
+        return send_from_directory(os.path.join(base_dir, 'static', 'css'), filename)
+    @app.route('/js/<path:filename>')
+    def serve_js(filename):
+        return send_from_directory(os.path.join(base_dir, 'static', 'js'), filename)
 
 
 @app.route('/test')
@@ -179,13 +197,15 @@ def upload_csv():
         return jsonify({'error': 'File must be a CSV'}), 400
     
     try:
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
-        
-        result = parse_csv_file(filepath, db)
-        
-        os.remove(filepath)
+        try:
+            result = parse_csv_file(filepath, db)
+        finally:
+            if os.path.exists(filepath):
+                os.remove(filepath)
         
         return jsonify({
             'success': True,
