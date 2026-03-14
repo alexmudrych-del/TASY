@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nahrát CSV - Meta Business Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div>
+                    <h1>Meta Business Analytics Dashboard</h1>
+                </div>
+                <nav style="display: flex; gap: 10px; align-items: center;">
+                    <a href="/">Dashboard</a>
+                    <a href="/upload" class="active">Nahrát CSV</a>
+                    <a href="/logout" style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 6px;">Odhlásit se</a>
+                </nav>
+            </div>
+        </header>
+        <main>
+            <section class="upload-section">
+                <h2>Nahrát CSV soubory z Meta Business Suite</h2>
+                <div class="upload-info">
+                    <h3>Podporované typy souborů:</h3>
+                    <ul>
+                        <li><strong>Follower Growth CSV</strong> - Vývoj počtu followerů</li>
+                        <li><strong>Demographics CSV</strong> - Demografická data</li>
+                        <li><strong>Engagement CSV</strong> - Metriky interakcí</li>
+                    </ul>
+                </div>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" id="fileInput" name="file" accept=".csv" multiple>
+                        <label for="fileInput" class="upload-label">
+                            <span class="upload-icon">📁</span>
+                            <span>Klikněte pro výběr CSV souborů nebo je sem přetáhněte</span>
+                        </label>
+                    </div>
+                    <div id="fileList" class="file-list"></div>
+                    <button type="submit" class="btn-primary" id="uploadBtn">Nahrát soubory</button>
+                </form>
+                <div id="uploadStatus" class="status-message"></div>
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+</body>
+</html>
